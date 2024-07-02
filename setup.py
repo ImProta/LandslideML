@@ -2,15 +2,22 @@
 This script is used to configure the setup of the LandslideML package.
 """
 
+import codecs
+import os
 from setuptools import setup, find_packages
 
-with open("README.md", "r", encoding="utf-8") as f:
-    long_description = f.read()
+here = os.path.abspath(os.path.dirname(__file__))
+
+with codecs.open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
+    long_description = '\n' + f.read()
+
+VERSION = '0.0.1'
+DESCRIPTION = 'A package for generation of binary landslide susceptibility ML models'
 
 setup(
     name='landslideml',
-    version='0.0.1',
-    description='A package for generation of binary landslide susceptibility ML models',
+    version=VERSION,
+    description=DESCRIPTION,
     packages=find_packages(),
     long_description=long_description,
     url='https://github.com/ImProta/LandslideML',
