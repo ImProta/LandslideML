@@ -7,84 +7,106 @@ test size for train-test split, and other optional parameters.
 
 """
 
-
+import os
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.svm import SVC
-from sklearn.metrics import classification_report, accuracy_score
+from landslideml import VALID_MODELS
+# from sklearn.metrics import classification_report, accuracy_score
 
 class MlModel:
     """
     A class for creating and training machine learning models for landslide prediction.
+
+    Attributes:
+        model_type (str): The type of machine learning model to be used. Supported model types are 
+            'RandomForest', 'SVM', and 'GBM'.
+        filepath (str): The filepath of the dataset to be used for training and testing the model.
+        target (str): The target variable in the dataset.
+        features (list): The list of feature variables in the dataset.
+        test_size (float): The proportion of the dataset to be used for testing the model.
+        kwargs (dict): Additional keyword arguments to be passed to the machine learning model.
+        type (str): The type of machine learning model.
+        model: The initialized machine learning model.
+        dataset: The loaded dataset.
+        x_train: The training set features.
+        x_test: The testing set features.
+        y_train: The training set target variable.
+        y_test: The testing set target variable.
+
+    Args:
+        model_type (str): The type of machine learning model to be used. Supported model types are 
+            'RandomForest', 'SVM', and 'GBM'.
+        filepath (str): The filepath of the dataset to be used for training and testing the model.
+        target (str): The target variable in the dataset.
+        features (list): The list of feature variables in the dataset.
+        test_size (float): The proportion of the dataset to be used for testing the model.
+        **kwargs: Additional keyword arguments to be passed to the machine learning model.
+
+    Raises:
+        ValueError: If the model type is not supported.
+        TypeError: If the filepath is not a string, the target is not a string, the features
+            are not a list, or the features are not strings.
     """
 
     def __init__(self,
                   filepath=None,
                   model_type='RandomForest',
+                  target_column='label',
+                  features_list=None,
                   test_size=0.2,
-                  features=None,
                   **kwargs):
-        valid_model_types = ['RandomForest', 'SVM', 'GBM']
-        if model_type not in valid_model_types:
+        self.__verify_input(model_type, filepath, target_column, features_list, test_size)
+        self.filepath = filepath
+        self.type = model_type
+        self.target_column = target_column
+        self.features_list = features_list
+        self.test_size = test_size
+        self.kwargs = kwargs
+
+        # Load and preprocess the dataset
+        self._load_dataset()
+        self._preprocess_data()
+
+    def _initialize_model(self):
+        match self.type:
+            case 'RandomForest':
+                return RandomForestClassifier()
+            case 'SVM':
+                return SVC()
+            case 'GBM':
+                return GradientBoostingClassifier()
+            case _:
+                raise ValueError('Model type not supported.')
+
+    def _load_dataset(self):
+        """
+        Load the data from the specified filepath.
+        """
+        self.dataset = pd.read_csv(self.filepath, header=0)
+
+    def _preprocess_data(self):
+        """
+        Preprocess the data by splitting it into training and testing sets.
+        """
+        x = self.dataset[self.features_list]
+        y = self.dataset[self.target_column]
+        self.x_train, self.x_test, self.y_train, self.y_test = train_test_split(
+            x, y, test_size=self.test_size, random_state=42)
+
+    def __verify_input(self, model_type, filepath, target, features, test_size):
+        if model_type not in VALID_MODELS:
             raise ValueError('Model type not supported.')
-        if test_size <= 0 or test_size >= 1:
-            raise ValueError('Test size must be between 0 and 1.')
-        if filepath is not None:
-            if not isinstance(filepath, str):
-                raise TypeError('Filepath must be a string.')
+        if not os.path.isfile(filepath):
+            raise FileNotFoundError(f"File '{filepath}' does not exist.")
+        if not isinstance(target, str):
+            raise TypeError('Target must be a string.')
         if not isinstance(features, list):
             raise TypeError('Features must be a list.')
         if not all(isinstance(feature, str) for feature in features):
             raise TypeError('Features must be a list of strings.')
-        #TODO: check if features are in the dataset
-        self.filepath = filepath
-        self.test_size = test_size
-        self.kwargs = kwargs
-        self.features = features
-        self.model = self._initialize_model(model_type)
-        self._load_data()
-        self._preprocess_data(features, 'class')
-        self.model.fit(self.x_train, self.y_train)
-        self.accuracy, self.report = self._evaluate_model()
-
-    def _initialize_model(self, model_type):
-        if model_type == 'RandomForest':
-            return RandomForestClassifier(**self.kwargs)
-        elif model_type == 'SVM':
-            return SVC(**self.kwargs)
-        elif model_type == 'GBM':
-            return GradientBoostingClassifier(**self.kwargs)
-        else:
-            raise ValueError('Model type not supported.')
-
-    def _load_data(self):
-        """
-        Load the data from the specified filepath.
-        """
-        self.data = pd.read_csv(self.filepath)
-        return self.data
-
-    def _preprocess_data(self, feature_columns, target_column):
-        """
-        Preprocess the data by splitting it into training and testing sets.
-        """
-        x = self.data[feature_columns]
-        y = self.data[target_column]
-        self.x_train, self.x_test, self.y_train, self.y_test = train_test_split(
-            x, y, test_size=self.test_size, random_state=42)
-
-    def _evaluate_model(self):
-        """
-        Evaluate the model on the test data.
-        """
-        y_pred = self.model.predict(self.x_test)
-        accuracy = accuracy_score(self.y_test, y_pred)
-        report = classification_report(self.y_test, y_pred)
-        return accuracy, report
-
-    def predict(self, filepath):
-        """
-        Run the model for another dataset.
-        """
-        self.model.predict(filepath)
+        if not isinstance(test_size, float):
+            raise TypeError('Test size must be a float.')
+        if test_size <= 0 or test_size >= 1:
+            raise ValueError('Test size must be between 0 and 1.')

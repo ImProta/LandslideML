@@ -1,8 +1,4 @@
-"""_summary_
-
-    Returns:
-    _type_: _description_
 """
-
-from landslideml.initializer import generate_model
-from landslideml.model import MlModel
+Basic package for landslide susceptibility modeling using machine learning.
+"""
+VALID_MODELS = ['RandomForest', 'SVM', 'GBM']
