@@ -131,9 +131,26 @@ class MlModel:
         Args:
             **kwargs: Keyword arguments to be passed to the machine learning model.
         """
+        # Check if the given kwargs are within the allowed kwargs for the model
+        invalid_kwargs = [kwarg for kwarg in kwargs if kwarg not in self.model.get_params()]
+        if invalid_kwargs:
+            raise ValueError(f"Invalid kwargs found: {', '.join(invalid_kwargs)}")
         # Update the kwargs with the new parameters
         self.kwargs.update(kwargs)
         # Reinitialize the model with the updated kwargs
         self.model = self.__initialize_model()
         self.model.fit(self.x_train, self.y_train)
         self.y_pred = self.model.predict(self.x_test)
+
+    def predict(self, data):
+        """
+        Make predictions using the trained model.
+
+        Args:
+            x (array-like): The input features for making predictions.
+
+        Returns:
+            array: The predicted values.
+        """
+        self.prediction = self.model.predict(data)
+        return self.model.predict(data)
