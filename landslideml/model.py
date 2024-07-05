@@ -13,7 +13,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.svm import SVC
 from landslideml import VALID_MODELS
-# from sklearn.metrics import classification_report, accuracy_score
 
 class MlModel:
     """
@@ -66,27 +65,38 @@ class MlModel:
         self.kwargs = kwargs
 
         # Load and preprocess the dataset
-        self._load_dataset()
-        self._preprocess_data()
+        self.__load_dataset()
+        self.__preprocess_data()
+        self.model = self.__initialize_model()
 
-    def _initialize_model(self):
-        match self.type:
-            case 'RandomForest':
-                return RandomForestClassifier()
-            case 'SVM':
-                return SVC()
-            case 'GBM':
-                return GradientBoostingClassifier()
-            case _:
-                raise ValueError('Model type not supported.')
+        # Initialize the model attributes
+        self.y_pred = None
+        self.report = None
+        self.prediction = None
 
-    def _load_dataset(self):
+    def __initialize_model(self):
+        """
+        Initialize the machine learning model based on the specified model type.
+        """
+
+        model = None
+        if self.type == 'RandomForest':
+            model = RandomForestClassifier(**self.kwargs)
+        elif self.type == 'SVM':
+            model = SVC(**self.kwargs)
+        elif self.type == 'GBM':
+            model = GradientBoostingClassifier(**self.kwargs)
+        else:
+            raise ValueError('Model type not supported.')
+        return model
+
+    def __load_dataset(self):
         """
         Load the data from the specified filepath.
         """
         self.dataset = pd.read_csv(self.filepath, header=0)
 
-    def _preprocess_data(self):
+    def __preprocess_data(self):
         """
         Preprocess the data by splitting it into training and testing sets.
         """
@@ -96,6 +106,9 @@ class MlModel:
             x, y, test_size=self.test_size, random_state=42)
 
     def __verify_input(self, model_type, filepath, target, features, test_size):
+        """
+        Verify the input arguments for the model.
+        """
         if model_type not in VALID_MODELS:
             raise ValueError('Model type not supported.')
         if not os.path.isfile(filepath):
@@ -110,3 +123,17 @@ class MlModel:
             raise TypeError('Test size must be a float.')
         if test_size <= 0 or test_size >= 1:
             raise ValueError('Test size must be between 0 and 1.')
+
+    def setup(self, **kwargs):
+        """
+        Reconfigure the model with new parameters.
+
+        Args:
+            **kwargs: Keyword arguments to be passed to the machine learning model.
+        """
+        # Update the kwargs with the new parameters
+        self.kwargs.update(kwargs)
+        # Reinitialize the model with the updated kwargs
+        self.model = self.__initialize_model()
+        self.model.fit(self.x_train, self.y_train)
+        self.y_pred = self.model.predict(self.x_test)
