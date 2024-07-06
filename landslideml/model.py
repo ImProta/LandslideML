@@ -8,10 +8,14 @@ test size for train-test split, and other optional parameters.
 """
 
 import os
+import warnings
+import joblib
 import pandas as pd
+
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.svm import SVC
+from sklearn.metrics import classification_report
 from landslideml import VALID_MODELS
 
 class MlModel:
@@ -62,8 +66,7 @@ class MlModel:
         self.target_column = target_column
         self.features_list = features_list
         self.test_size = test_size
-        self.kwargs = kwargs
-
+        self.kwargs = kwargs['kwargs']
         # Load and preprocess the dataset
         self.__load_dataset()
         self.__preprocess_data()
@@ -72,23 +75,20 @@ class MlModel:
         # Initialize the model attributes
         self.y_pred = None
         self.report = None
-        self.prediction = None
+        self.last_prediction = None
 
     def __initialize_model(self):
         """
         Initialize the machine learning model based on the specified model type.
         """
-
-        model = None
         if self.type == 'RandomForest':
-            model = RandomForestClassifier(**self.kwargs)
+            return RandomForestClassifier(**self.kwargs)
         elif self.type == 'SVM':
-            model = SVC(**self.kwargs)
+            return SVC(**self.kwargs)
         elif self.type == 'GBM':
-            model = GradientBoostingClassifier(**self.kwargs)
+            return GradientBoostingClassifier(**self.kwargs)
         else:
             raise ValueError('Model type not supported.')
-        return model
 
     def __load_dataset(self):
         """
@@ -142,6 +142,18 @@ class MlModel:
         self.model.fit(self.x_train, self.y_train)
         self.y_pred = self.model.predict(self.x_test)
 
+    def evaluate_model(self, *, plot=False):
+        """
+        Evaluate the performance of the trained model.
+        """
+        if self.y_pred is None:
+            warnings.warn("No data was loaded. Prediction will be done with test data.")
+            self.y_pred = self.model.predict(self.x_test)
+        if plot is True:
+            print(classification_report(self.y_test, self.y_pred, output_dict=False))
+        self.report = classification_report(self.y_test, self.y_pred, output_dict=True)
+        return self.report
+
     def predict(self, data):
         """
         Make predictions using the trained model.
@@ -152,5 +164,5 @@ class MlModel:
         Returns:
             array: The predicted values.
         """
-        self.prediction = self.model.predict(data)
+        self.last_prediction = self.model.predict(data)
         return self.model.predict(data)
