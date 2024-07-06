@@ -1,5 +1,5 @@
 """
-This module is used to test the initializer module of the LandslideML package.
+This module is used to test the reader module of the LandslideML package.
 """
 
 import unittest
@@ -10,7 +10,7 @@ from landslideml import VALID_MODELS
 
 class TestInitializer(unittest.TestCase):
     """
-    Test the initializer module for different input parameters for the Random Forest ML model. 
+    Test the reader module for different input parameters for the Random Forest ML model. 
     """
 
     def setUp(self):
