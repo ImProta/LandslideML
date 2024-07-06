@@ -9,7 +9,7 @@ test size for train-test split, and other optional parameters.
 
 import os
 import warnings
-# import joblib
+import joblib
 import pandas as pd
 
 from sklearn.model_selection import train_test_split
@@ -169,3 +169,12 @@ class MlModel:
         """
         self.last_prediction = self.model.predict(data)
         return self.model.predict(data)
+    
+    def save_model(self, filepath):
+        """
+        Save the trained model to a file.
+
+        Args:
+            filepath (str): The filepath to save the model to.
+        """
+        joblib.dump(self.model, filepath)
