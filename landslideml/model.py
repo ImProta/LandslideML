@@ -9,7 +9,7 @@ test size for train-test split, and other optional parameters.
 
 import os
 import warnings
-import joblib
+# import joblib
 import pandas as pd
 
 from sklearn.model_selection import train_test_split
@@ -74,6 +74,7 @@ class MlModel:
 
         # Initialize the model attributes
         self.y_pred = None
+        self.y_pred_test = None
         self.report = None
         self.last_prediction = None
 
@@ -140,16 +141,18 @@ class MlModel:
         # Reinitialize the model with the updated kwargs
         self.model = self.__initialize_model()
         self.model.fit(self.x_train, self.y_train)
-        self.y_pred = self.model.predict(self.x_test)
+        self.y_pred_test = self.model.predict(self.x_test)
 
-    def evaluate_model(self, *, plot=False):
+    def evaluate_model(self, *, show=False):
         """
         Evaluate the performance of the trained model.
         """
+        if not isinstance(show, bool):
+            raise TypeError('Plot must be a boolean.')
         if self.y_pred is None:
             warnings.warn("No data was loaded. Prediction will be done with test data.")
             self.y_pred = self.model.predict(self.x_test)
-        if plot is True:
+        if show is True:
             print(classification_report(self.y_test, self.y_pred, output_dict=False))
         self.report = classification_report(self.y_test, self.y_pred, output_dict=True)
         return self.report
