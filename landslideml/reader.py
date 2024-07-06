@@ -38,7 +38,7 @@ def generate_model(filepath: str, model_type: str, features: list, target: str) 
                               features_list=features,
                               target_column=target,
                               kwargs=svm_args)
-        case "BGM":
+        case "GBM":
             bgm_args = GradientBoostingClassifier().get_params()
             return MlModel(filepath=filepath,
                               model_type=model_type,
