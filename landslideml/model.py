@@ -169,7 +169,7 @@ class MlModel:
         """
         self.last_prediction = self.model.predict(data)
         return self.model.predict(data)
-    
+
     def save_model(self, filepath):
         """
         Save the trained model to a file.
@@ -177,4 +177,6 @@ class MlModel:
         Args:
             filepath (str): The filepath to save the model to.
         """
+        if not isinstance(filepath, str):
+            raise ValueError('Filepath must be a string.')
         joblib.dump(self.model, filepath)
