@@ -11,6 +11,8 @@ import os
 import warnings
 import joblib
 import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
@@ -180,3 +182,29 @@ class MlModel:
         if not isinstance(filepath, str):
             raise ValueError('Filepath must be a string.')
         joblib.dump(self, filepath)
+
+    def generate_heatmap(self, filepath):
+        """
+        Save the heatmap of the dataset to a file.
+
+        Args:
+            filepath (str): The filepath to save the heatmap to.
+        """
+        if not isinstance(filepath, str):
+            raise TypeError('Filepath must be a string.')
+        plt.figure(figsize=(10, 8))
+        numeric_data = self.dataset.select_dtypes(include=[float, int])
+        if self.target_column in numeric_data.columns:
+            numeric_data = numeric_data.drop(columns=[self.target_column])
+        keywords = ['coord', 'loc', 'location', 'coordinates']
+        columns_to_exclude = [col for col in numeric_data.columns 
+                              if any(keyword in col.lower() for keyword in keywords)]
+        numeric_data = numeric_data.drop(columns=columns_to_exclude)
+        sns.heatmap(numeric_data.corr(),
+                    xticklabels=numeric_data.columns,
+                    yticklabels=numeric_data.columns,
+                    annot=True,
+                    fmt='.2f',
+                    cmap='coolwarm')
+        plt.title('Heatmap of Dataset Features')
+        plt.savefig(filepath)
