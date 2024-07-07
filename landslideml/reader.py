@@ -1,6 +1,8 @@
 """
-Reader module for reading in data.
+This module provides functions for reading and loading data in the LandslideML project.
 """
+
+import joblib
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
 from sklearn.ensemble import GradientBoostingClassifier
@@ -14,12 +16,15 @@ def generate_model(filepath: str, model_type: str, features: list, target: str) 
     Args:
         filepath (str): The file path of the dataset.
         model_type (str): The type of machine learning model to generate. 
-                        Select from 'RandomForest', 'SVM', 'BGM'.
+                        Select from 'RandomForest', 'SVM', 'GBM'.
         features (list): The list of feature names.
         target (str): The target variable name.
 
     Returns:
         MlModel: An instance of the MlModel class representing the trained machine learning model.
+        
+    Raises:
+        ValueError: If an invalid model type is selected.
     """
     # Generate a match case structure to return the corresponding MlModel
     match model_type:
@@ -47,3 +52,21 @@ def generate_model(filepath: str, model_type: str, features: list, target: str) 
                               kwargs=bgm_args)
         case _:
             raise ValueError(f"Select a model from the list: {', '.join(VALID_MODELS)}.")
+
+def load_model(filepath:str):
+    """
+    Load a saved model from a binary file with joblib.
+
+    Args:
+        filepath (str): The file path of the saved model.
+
+    Returns:
+        object: The loaded model object.
+    """
+    if not isinstance(filepath, str):
+        raise ValueError("The file path must be a string.")
+    try:
+        model = joblib.load(filepath)
+    except FileNotFoundError as exc:
+        raise FileNotFoundError(f"Model file not found at {filepath}.") from exc
+    return model

@@ -179,4 +179,4 @@ class MlModel:
         """
         if not isinstance(filepath, str):
             raise ValueError('Filepath must be a string.')
-        joblib.dump(self.model, filepath)
+        joblib.dump(self, filepath)
