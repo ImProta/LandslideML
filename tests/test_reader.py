@@ -8,7 +8,7 @@ from landslideml.model import MlModel
 from landslideml import VALID_MODELS
 
 
-class TestInitializer(unittest.TestCase):
+class TestReaderMethod(unittest.TestCase):
     """
     Test the reader module for different input parameters for the Random Forest ML model. 
     """

@@ -6,7 +6,7 @@ import unittest
 from landslideml.reader import generate_model
 
 
-class TestInitializer(unittest.TestCase):
+class TestModelSetupMethod(unittest.TestCase):
     """
     Test the models module functionalities for the random forest model.
     """
