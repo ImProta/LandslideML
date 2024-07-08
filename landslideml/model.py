@@ -14,11 +14,12 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+import xarray as xr
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.svm import SVC
 from sklearn.metrics import classification_report
-from landslideml import VALID_MODELS
+from .config import VALID_MODELS
 
 class MlModel:
     """
@@ -62,13 +63,14 @@ class MlModel:
                   features_list=None,
                   test_size=0.2,
                   **kwargs):
-        self.__verify_input(model_type, filepath, target_column, features_list, test_size)
         self.filepath = filepath
-        self.type = model_type
+        self.model_type = model_type
         self.target_column = target_column
         self.features_list = features_list
         self.test_size = test_size
         self.kwargs = kwargs['kwargs']
+        # Verify the input arguments
+        self.__verify_input()
         # Load and preprocess the dataset
         self.__load_dataset()
         self.__preprocess_data()
@@ -78,17 +80,19 @@ class MlModel:
         self.y_pred = None
         self.y_pred_test = None
         self.report = None
+        self.prediction_data_path = None
+        self.prediction_file_path = None
         self.last_prediction = None
 
     def __initialize_model(self):
         """
         Initialize the machine learning model based on the specified model type.
         """
-        if self.type == 'RandomForest':
+        if self.model_type == 'RandomForest':
             return RandomForestClassifier(**self.kwargs)
-        elif self.type == 'SVM':
+        elif self.model_type == 'SVM':
             return SVC(**self.kwargs)
-        elif self.type == 'GBM':
+        elif self.model_type == 'GBM':
             return GradientBoostingClassifier(**self.kwargs)
         else:
             raise ValueError('Model type not supported.')
@@ -108,23 +112,23 @@ class MlModel:
         self.x_train, self.x_test, self.y_train, self.y_test = train_test_split(
             x, y, test_size=self.test_size, random_state=42)
 
-    def __verify_input(self, model_type, filepath, target, features, test_size):
+    def __verify_input(self):
         """
         Verify the input arguments for the model.
         """
-        if model_type not in VALID_MODELS:
+        if self.model_type not in VALID_MODELS:
             raise ValueError('Model type not supported.')
-        if not os.path.isfile(filepath):
-            raise FileNotFoundError(f"File '{filepath}' does not exist.")
-        if not isinstance(target, str):
+        if not os.path.isfile(self.filepath):
+            raise FileNotFoundError(f"File '{self.filepath}' does not exist.")
+        if not isinstance(self.target_column, str):
             raise TypeError('Target must be a string.')
-        if not isinstance(features, list):
+        if not isinstance(self.features_list, list):
             raise TypeError('Features must be a list.')
-        if not all(isinstance(feature, str) for feature in features):
+        if not all(isinstance(feature, str) for feature in self.features_list):
             raise TypeError('Features must be a list of strings.')
-        if not isinstance(test_size, float):
+        if not isinstance(self.test_size, float):
             raise TypeError('Test size must be a float.')
-        if test_size <= 0 or test_size >= 1:
+        if self.test_size <= 0 or self.test_size >= 1:
             raise ValueError('Test size must be between 0 and 1.')
 
     def setup(self, **kwargs):
@@ -145,7 +149,7 @@ class MlModel:
         self.model.fit(self.x_train, self.y_train)
         self.y_pred_test = self.model.predict(self.x_test)
 
-    def evaluate_model(self, *, show=False):
+    def evaluate_model(self, *, show:bool=False):
         """
         Evaluate the performance of the trained model.
         """
@@ -159,7 +163,7 @@ class MlModel:
         self.report = classification_report(self.y_test, self.y_pred, output_dict=True)
         return self.report
 
-    def predict(self, data):
+    def predict(self,*,data=None):
         """
         Make predictions using the trained model.
 
@@ -169,6 +173,26 @@ class MlModel:
         Returns:
             array: The predicted values.
         """
+        type_of_data = type(data)
+        if data is None:
+            data = self.x_test
+        elif type_of_data == pd.DataFrame:
+            self.last_prediction = self.model.predict(data)
+            return self.model.predict(data)
+        elif type_of_data == xr.Dataset:
+            data = data.to_dataframe()
+            data = data[self.features_list]
+        elif type_of_data == str:
+            if not os.path.isfile(data):
+                raise FileNotFoundError(f"File '{data}' does not exist.")
+            elif data.endswith('.csv'):
+                data = pd.read_csv(data, header=0)
+                data = data[self.features_list]
+            elif data.endswith('.nc'):
+                data = xr.open_dataset(data)
+                data = data.to_dataframe()
+                data = data[self.features_list]
+
         self.last_prediction = self.model.predict(data)
         return self.model.predict(data)
 
@@ -197,7 +221,7 @@ class MlModel:
         if self.target_column in numeric_data.columns:
             numeric_data = numeric_data.drop(columns=[self.target_column])
         keywords = ['coord', 'loc', 'location', 'coordinates']
-        columns_to_exclude = [col for col in numeric_data.columns 
+        columns_to_exclude = [col for col in numeric_data.columns
                               if any(keyword in col.lower() for keyword in keywords)]
         numeric_data = numeric_data.drop(columns=columns_to_exclude)
         sns.heatmap(numeric_data.corr(),
