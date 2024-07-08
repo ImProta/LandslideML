@@ -16,10 +16,12 @@ class TestLoadModel(unittest.TestCase):
         self.features = ['tree_cover_density','alti','slope', 'clay']
         self.model_type = 'RandomForest'
         self.target = 'label'
+        self.test_size = 0.2
         self.random_forest = generate_model(self.filepath,
                                             self.model_type,
                                             self.features,
-                                            self.target)
+                                            self.target,
+                                            self.test_size)
         self.random_forest.setup(n_estimators=100, max_depth=10)
         self.random_forest.evaluate_model()
         self.model_filepath = 'tests/TestModelRandomForest2024.pkl'
@@ -38,7 +40,7 @@ class TestLoadModel(unittest.TestCase):
         """
         random_forest_loaded = load_model(self.model_filepath)
         self.assertEqual(self.random_forest.kwargs, random_forest_loaded.kwargs)
-        self.assertEqual(self.random_forest.type, random_forest_loaded.type)
+        self.assertEqual(self.random_forest.model_type, random_forest_loaded.model_type)
         self.assertEqual(self.random_forest.target_column, random_forest_loaded.target_column)
         self.assertEqual(self.random_forest.features_list, random_forest_loaded.features_list)
         self.assertEqual(self.random_forest.test_size, random_forest_loaded.test_size)

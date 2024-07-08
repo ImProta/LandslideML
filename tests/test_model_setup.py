@@ -20,13 +20,18 @@ class TestModelSetupMethod(unittest.TestCase):
         self.features = ['tree_cover_density','alti','slope', 'clay']
         self.model_type = 'RandomForest'
         self.target = 'label'
+        self.test_size = 0.2
 
     def test_model_setup_wrong_parameters(self):
         """
         Test the generate_model function for the random forest when inputting wrong
           parameters in the setup function.
         """
-        random_forest = generate_model(self.filepath, self.model_type, self.features, self.target)
+        random_forest = generate_model(self.filepath,
+                                       self.model_type,
+                                       self.features,
+                                       self.target,
+                                       self.test_size)
         with self.assertRaises(ValueError):
             random_forest.setup(wrong_parameter='100', max_depth='10')
 
@@ -35,7 +40,7 @@ class TestModelSetupMethod(unittest.TestCase):
         Test the generate_model function for the random forest when inputting the correct 
           parameters in the setup function.
         """
-        random_forest = generate_model(self.filepath, self.model_type, self.features, self.target)
+        random_forest = generate_model(self.filepath, self.model_type, self.features, self.target, self.test_size)
         random_forest.setup(n_estimators=100, max_depth=10)
         self.assertEqual(random_forest.kwargs['n_estimators'], 100)
         self.assertEqual(random_forest.kwargs['max_depth'], 10)

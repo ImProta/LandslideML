@@ -24,10 +24,12 @@ class TestEvaluateModelMethod(unittest.TestCase):
         self.features = ['tree_cover_density','alti','slope', 'clay']
         self.model_type = 'RandomForest'
         self.target = 'label'
+        self.test_size = 0.2
         self.random_forest = generate_model(self.filepath,
                                             self.model_type,
                                             self.features,
-                                            self.target)
+                                            self.target,
+                                            self.test_size)
         self.random_forest.setup(n_estimators=100, max_depth=10)
 
     def test_evaluate_model_no_plot(self):
