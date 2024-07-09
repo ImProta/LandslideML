@@ -48,11 +48,11 @@ random_forest = lsm.generate_model(DATA_PATH,
 # Modify the model parameters
 random_forest.setup(n_estimators=100, max_depth=15, random_state=42)
 
-# Predict the model
-# random_forest.predict(filepath="testcase_data/prediction.nc")
+# Predict the model with a csv file
+random_forest.predict("testcase_data/training.csv")
 
 # Evaluate the model
-# random_forest.evaluate_model()
+random_forest.evaluate_model()
 
 # Save the model
-# random_forest.save_model("random_forest_model.pkl")
+random_forest.save_model("random_forest_model.pkl")

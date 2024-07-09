@@ -163,38 +163,31 @@ class MlModel:
         self.report = classification_report(self.y_test, self.y_pred, output_dict=True)
         return self.report
 
-    def predict(self,*,data=None):
+    def predict(self, data):
         """
         Make predictions using the trained model.
 
         Args:
             x (array-like): The input features for making predictions.
+            It can be a pandas DataFrame, an xarray Dataset, or a file path to a CSV or NetCDF file.
 
         Returns:
             array: The predicted values.
         """
         type_of_data = type(data)
-        if data is None:
-            data = self.x_test
-        elif type_of_data == pd.DataFrame:
-            self.last_prediction = self.model.predict(data)
-            return self.model.predict(data)
+        if type_of_data == pd.DataFrame:
+            data_to_predict = data[self.features_list]
         elif type_of_data == xr.Dataset:
-            data = data.to_dataframe()
-            data = data[self.features_list]
+            data_to_predict = data.to_dataframe()[self.features_list]
         elif type_of_data == str:
             if not os.path.isfile(data):
                 raise FileNotFoundError(f"File '{data}' does not exist.")
             elif data.endswith('.csv'):
-                data = pd.read_csv(data, header=0)
-                data = data[self.features_list]
+                data_to_predict = pd.read_csv(data, header=0)[self.features_list]
             elif data.endswith('.nc'):
-                data = xr.open_dataset(data)
-                data = data.to_dataframe()
-                data = data[self.features_list]
-
-        self.last_prediction = self.model.predict(data)
-        return self.model.predict(data)
+                data_to_predict = xr.open_dataset(data).to_dataframe()[self.features_list]
+        self.last_prediction = self.model.predict(data_to_predict)
+        return self.last_prediction
 
     def save_model(self, filepath):
         """
