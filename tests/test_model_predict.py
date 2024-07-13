@@ -34,13 +34,20 @@ class TestPredictMethod(unittest.TestCase):
         dataset = pd.read_csv(self.data_filepath_csv, header=0)
         self.random_forest.predict(dataset)
         self.assertIsInstance(self.random_forest.last_prediction, np.ndarray)
-    
+
     def test_predict_for_csv_file(self):
         """
         Test the predict method for a random forest model.
         """
 
         self.random_forest.predict(self.data_filepath_csv)
+        self.assertIsInstance(self.random_forest.last_prediction, np.ndarray)
+
+    def test_predict_for_nc_file(self):
+        """
+        Test the predict method for a random forest model.
+        """
+        self.random_forest.predict(self.data_filepath_nc)
         self.assertIsInstance(self.random_forest.last_prediction, np.ndarray)
 
 if __name__ == '__main__':

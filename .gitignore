@@ -161,4 +161,4 @@ cython_debug/
 
 # Data files
 testcase_data/prediction.nc
-testcase_data/prediction2.nc
+testcase_data/prediction_old.nc

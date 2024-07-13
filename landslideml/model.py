@@ -10,6 +10,7 @@ test size for train-test split, and other optional parameters.
 import os
 import warnings
 import joblib
+from netCDF4 import Dataset #pylint: disable=no-name-in-module
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -185,7 +186,11 @@ class MlModel:
             elif data.endswith('.csv'):
                 data_to_predict = pd.read_csv(data, header=0)[self.features_list]
             elif data.endswith('.nc'):
-                data_to_predict = xr.open_dataset(data).to_dataframe()[self.features_list]
+                ds = Dataset(data) 
+                print(ds)
+                data_to_predict = ds.to_dataframe()[self.features_list]
+
+
         self.last_prediction = self.model.predict(data_to_predict)
         return self.last_prediction
 
