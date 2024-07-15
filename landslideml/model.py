@@ -81,8 +81,9 @@ class MlModel:
         self.y_pred = None
         self.y_pred_test = None
         self.report = None
-        self.prediction_data_path = None
-        self.prediction_file_path = None
+        self.last_prediction_location = None
+        self.last_prediction_object = None
+        self.last_prediction_object_type = None
         self.last_prediction = None
 
     def __initialize_model(self):
@@ -103,6 +104,24 @@ class MlModel:
         Load the data from the specified filepath.
         """
         self.dataset = pd.read_csv(self.filepath, header=0)
+
+    def __mapping(self):
+        """
+        Map the prediction values to the original entries in the prediction dataset.
+        """
+        if self.last_prediction_object_type == pd.DataFrame:
+            # Case for pd.DataFrame
+            pass
+        elif self.last_prediction_object_type == xr.Dataset:
+            # Case for xr.Dataset
+            pass
+        elif self.last_prediction_object_type == str:
+            if self.last_prediction_object.endswith('.csv'):
+                # Case for CSV file
+                pass
+            elif self.last_prediction_object.endswith('.nc'):
+                # Case for NetCDF file
+                pass
 
     def __preprocess_data(self):
         """
@@ -175,23 +194,32 @@ class MlModel:
         Returns:
             array: The predicted values.
         """
+        coordinate_columns = ['coord', 'coordinates', 'position', 'pos']
         type_of_data = type(data)
         if type_of_data == pd.DataFrame:
             data_to_predict = data[self.features_list]
+            self.last_prediction_location = data[[col for col in data.columns 
+                                                  if any(word in col.lower() for word in coordinate_columns)]]
         elif type_of_data == xr.Dataset:
             data_to_predict = data.to_dataframe()[self.features_list]
+            self.last_prediction_location = data[[col for col in data.columns 
+                                                  if any(word in col.lower() for word in coordinate_columns)]]
         elif type_of_data == str:
             if not os.path.isfile(data):
                 raise FileNotFoundError(f"File '{data}' does not exist.")
             elif data.endswith('.csv'):
-                data_to_predict = pd.read_csv(data, header=0)[self.features_list]
+                csv_df = pd.read_csv(data, header=0)
+                data_to_predict = csv_df[self.features_list]
+                self.last_prediction_location = pd.read_csv(data, header=0)[[col for col in csv_df.columns 
+                                                                             if any(word in col.lower() for word in coordinate_columns)]]
             elif data.endswith('.nc'):
-                ds = Dataset(data) 
-                print(ds)
+                ds = Dataset(data)
                 data_to_predict = ds.to_dataframe()[self.features_list]
-
-
+                self.last_prediction_location = self.dataset[[col for col in self.dataset.columns if any(word in col.lower() for word in coordinate_columns)]]
+        self.last_prediction_object_type = type_of_data
+        self.last_prediction_object = data
         self.last_prediction = self.model.predict(data_to_predict)
+        self.__mapping()
         return self.last_prediction
 
     def save_model(self, filepath):
