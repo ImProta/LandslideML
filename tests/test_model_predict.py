@@ -49,7 +49,7 @@ class TestPredictMethod(unittest.TestCase):
         """
         self.random_forest.predict(self.data_filepath_nc)
         self.assertIsInstance(self.random_forest.last_prediction, np.ndarray)
-        self.assertEqual(self.random_forest.last_prediction.shape[0], 
+        self.assertEqual(self.random_forest.last_prediction.shape[0],
                          self.random_forest.last_prediction_dataset_size)
 
 if __name__ == '__main__':
