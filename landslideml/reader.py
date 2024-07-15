@@ -17,7 +17,7 @@ def generate_model(filepath: str,
     """
     Create a machine learning model for landslide prediction.
 
-    Args:
+    Input:
         filepath (str): The file path of the dataset.
         model_type (str): The type of machine learning model to generate. 
                         Select from 'RandomForest', 'SVM', 'GBM'.
@@ -64,11 +64,15 @@ def load_model(filepath:str):
     """
     Load a saved model from a binary file with joblib.
 
-    Args:
+    Input:
         filepath (str): The file path of the saved model.
 
     Returns:
         object: The loaded model object.
+
+    Raises:
+        ValueError: If the file path is not a string.
+        FileNotFoundError: If the file path does not exist.
     """
     if not isinstance(filepath, str):
         raise ValueError("The file path must be a string.")

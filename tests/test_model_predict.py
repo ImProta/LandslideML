@@ -24,12 +24,12 @@ class TestPredictMethod(unittest.TestCase):
                                             self.target,
                                             self.test_size)
         self.random_forest.setup(n_estimators=100, max_depth=10)
-        self.data_filepath_nc = "./testcase_data/prediction.nc"
+        self.data_filepath_nc = "./testcase_data/prediction_cropped.nc"
         self.data_filepath_csv = "./testcase_data/training.csv"
 
     def test_predict_for_pandas_dataset(self):
         """
-        Test the predict method for a random forest model.
+        Test the predict method for a random forest model with a pandas dataframe as input.
         """
         dataset = pd.read_csv(self.data_filepath_csv, header=0)
         self.random_forest.predict(dataset)
@@ -37,7 +37,7 @@ class TestPredictMethod(unittest.TestCase):
 
     def test_predict_for_csv_file(self):
         """
-        Test the predict method for a random forest model.
+        Test the predict method for a random forest model with csv file as input.
         """
 
         self.random_forest.predict(self.data_filepath_csv)
@@ -45,10 +45,12 @@ class TestPredictMethod(unittest.TestCase):
 
     def test_predict_for_nc_file(self):
         """
-        Test the predict method for a random forest model.
+        Test the predict method for a random forest model with nc file as input.
         """
         self.random_forest.predict(self.data_filepath_nc)
         self.assertIsInstance(self.random_forest.last_prediction, np.ndarray)
+        self.assertEqual(self.random_forest.last_prediction.shape[0], 
+                         self.random_forest.last_prediction_dataset_size)
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
