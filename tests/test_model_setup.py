@@ -25,7 +25,7 @@ class TestModelSetupMethod(unittest.TestCase):
     def test_model_setup_wrong_parameters(self):
         """
         Test the generate_model function for the random forest when inputting wrong
-          parameters in the setup function.
+        parameters in the setup function.
         """
         random_forest = generate_model(self.filepath,
                                        self.model_type,
@@ -38,9 +38,13 @@ class TestModelSetupMethod(unittest.TestCase):
     def test_model_setup_correct_parameters(self):
         """
         Test the generate_model function for the random forest when inputting the correct 
-          parameters in the setup function.
+        parameters in the setup function.
         """
-        random_forest = generate_model(self.filepath, self.model_type, self.features, self.target, self.test_size)
+        random_forest = generate_model(self.filepath,
+                                       self.model_type,
+                                       self.features,
+                                       self.target,
+                                       self.test_size)
         random_forest.setup(n_estimators=100, max_depth=10)
         self.assertEqual(random_forest.kwargs['n_estimators'], 100)
         self.assertEqual(random_forest.kwargs['max_depth'], 10)

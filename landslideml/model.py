@@ -79,9 +79,11 @@ class MlModel:
         self.report = None
         self.last_prediction_dataset_size = None
         self.last_prediction_location = None
+        self.last_prediction_result = None
         self.last_prediction_object = None
         self.last_prediction_object_type = None
         self.last_prediction = None
+        self.last_prediction_map = None
 
     def __initialize_model(self):
         """
@@ -109,19 +111,8 @@ class MlModel:
         """
         Map the prediction values to the original entries in the prediction dataset.
         """
-        if self.last_prediction_object_type == pd.DataFrame:
-            # Case for pd.DataFrame
-            pass
-        elif self.last_prediction_object_type == xr.Dataset:
-            # Case for xr.Dataset
-            pass
-        elif self.last_prediction_object_type == str:
-            if self.last_prediction_object.endswith('.csv'):
-                # Case for CSV file
-                pass
-            elif self.last_prediction_object.endswith('.nc'):
-                # Case for NetCDF file
-                pass
+        self.last_prediction_result = pd.DataFrame(self.last_prediction_location)
+        self.last_prediction_result['label'] = self.last_prediction
 
     def __preprocess_data(self):
         """
@@ -179,7 +170,9 @@ class MlModel:
 
     def evaluate_model(self, *, show:bool=False):
         """
-        Evaluate the performance of the trained model.
+        Evaluate the performance of the trained model. It calls for the classification report
+        function from scikit-learn and returns a dictionary containing the classification report.
+        Printing the classification report is optional by setting the show parameter to True.
     
         Input:
             show (bool):  Default is False. If True, print the classification report.
@@ -199,7 +192,9 @@ class MlModel:
 
     def predict(self, data):
         """
-        This function makes predictions using the current trained model.
+        This function makes predictions using the current trained model. It can take in a pandas
+        DataFrame, an xarray Dataset, or a file path to a CSV or NetCDF file. The function will
+        return the predicted values and store the input data for future reference.
 
         Input:
             x (array-like): The input features for making predictions.
@@ -216,9 +211,11 @@ class MlModel:
                                         " may indicate binary incompatibility")
         coordinate_columns = ['coord', 'coordinates', 'position', 'pos']
         type_of_data = type(data)
+        print(type_of_data)
         # Read the data and extract the features for a pandas dataframe as input
         if type_of_data == pd.DataFrame:
             data_to_predict = data[self.features_list]
+            self.last_prediction_dataset_size = data_to_predict.shape[0]
             location_columns = data[
                 [col for col in data.columns
                  if any(word in col.lower() for word in coordinate_columns)]
@@ -227,6 +224,7 @@ class MlModel:
         # Extract the features for an xarray dataset as input
         elif type_of_data == xr.Dataset:
             data_to_predict = data.to_dataframe()[self.features_list]
+            self.last_prediction_dataset_size = data_to_predict.shape[0]
             location_columns = data[
                 [col for col in data.columns
                  if any(word in col.lower() for word in coordinate_columns)]
@@ -240,6 +238,7 @@ class MlModel:
             elif data.endswith('.csv'):
                 csv_df = pd.read_csv(data, header=0)
                 data_to_predict = csv_df[self.features_list]
+                self.last_prediction_dataset_size = csv_df.shape[0]
                 location_columns = csv_df[
                     [col for col in csv_df.columns
                      if any(word in col.lower() for word in coordinate_columns)]
@@ -263,6 +262,9 @@ class MlModel:
                 data_to_predict = df[self.features_list]
             else:
                 raise ValueError("Invalid file format. Supported formats are CSV and NetCDF.")
+        else:
+            raise ValueError("Unsupported data type. Supported types are pandas DataFrame, " \
+                             "xarray Dataset, and file path to CSV or NetCDF file.")
         self.last_prediction_object_type = type_of_data
         self.last_prediction_object = data
         self.last_prediction = self.model.predict(data_to_predict)
