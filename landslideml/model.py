@@ -77,13 +77,12 @@ class MlModel:
         self.y_pred = None
         self.y_pred_test = None
         self.report = None
-        self.last_prediction_dataset_size = None
-        self.last_prediction_location = None
-        self.last_prediction_result = None
-        self.last_prediction_object = None
-        self.last_prediction_object_type = None
-        self.last_prediction = None
-        self.last_prediction_map = None
+        self.prediction_dataset_size = None
+        self.prediction_location = None
+        self.prediction_object = None
+        self.prediction_object_type = None
+        self.prediction = None
+        self.prediction_map = None
 
     def __initialize_model(self):
         """
@@ -111,8 +110,8 @@ class MlModel:
         """
         Map the prediction values to the original entries in the prediction dataset.
         """
-        self.last_prediction_result = pd.DataFrame(self.last_prediction_location)
-        self.last_prediction_result['label'] = self.last_prediction
+        self.prediction_map = pd.DataFrame(self.prediction_location)
+        self.prediction_map['label'] = self.prediction
 
     def __preprocess_data(self):
         """
@@ -211,25 +210,24 @@ class MlModel:
                                         " may indicate binary incompatibility")
         coordinate_columns = ['coord', 'coordinates', 'position', 'pos']
         type_of_data = type(data)
-        print(type_of_data)
         # Read the data and extract the features for a pandas dataframe as input
         if type_of_data == pd.DataFrame:
             data_to_predict = data[self.features_list]
-            self.last_prediction_dataset_size = data_to_predict.shape[0]
+            self.prediction_dataset_size = data_to_predict.shape[0]
             location_columns = data[
                 [col for col in data.columns
                  if any(word in col.lower() for word in coordinate_columns)]
                 ]
-            self.last_prediction_location = location_columns
+            self.prediction_location = location_columns
         # Extract the features for an xarray dataset as input
         elif type_of_data == xr.Dataset:
             data_to_predict = data.to_dataframe()[self.features_list]
-            self.last_prediction_dataset_size = data_to_predict.shape[0]
+            self.prediction_dataset_size = data_to_predict.shape[0]
             location_columns = data[
                 [col for col in data.columns
                  if any(word in col.lower() for word in coordinate_columns)]
                 ]
-            self.last_prediction_location = location_columns
+            self.prediction_location = location_columns
         # Read the data from a file and extract the features
         elif type_of_data == str:
             if not os.path.isfile(data):
@@ -238,12 +236,12 @@ class MlModel:
             elif data.endswith('.csv'):
                 csv_df = pd.read_csv(data, header=0)
                 data_to_predict = csv_df[self.features_list]
-                self.last_prediction_dataset_size = csv_df.shape[0]
+                self.prediction_dataset_size = csv_df.shape[0]
                 location_columns = csv_df[
                     [col for col in csv_df.columns
                      if any(word in col.lower() for word in coordinate_columns)]
                     ]
-                self.last_prediction_location = location_columns
+                self.prediction_location = location_columns
             # Read the data from a NetCDF file
             elif data.endswith('.nc'):
                 ds = xr.open_dataset(data)
@@ -257,19 +255,19 @@ class MlModel:
                     raise ValueError("The number of features does not match the " \
                                      "number of columns in the values array")
                 df = pd.DataFrame(values, columns=features_list)
-                self.last_prediction_dataset_size = df.shape[0]
-                self.last_prediction_location = df[['latitude', 'longitude']]
+                self.prediction_dataset_size = df.shape[0]
+                self.prediction_location = df[['latitude', 'longitude']]
                 data_to_predict = df[self.features_list]
             else:
                 raise ValueError("Invalid file format. Supported formats are CSV and NetCDF.")
         else:
             raise ValueError("Unsupported data type. Supported types are pandas DataFrame, " \
                              "xarray Dataset, and file path to CSV or NetCDF file.")
-        self.last_prediction_object_type = type_of_data
-        self.last_prediction_object = data
-        self.last_prediction = self.model.predict(data_to_predict)
+        self.prediction_object_type = type_of_data
+        self.prediction_object = data
+        self.prediction = self.model.predict(data_to_predict)
         self.__mapping()
-        return self.last_prediction
+        return self.prediction
 
     def save_model(self, filepath):
         """

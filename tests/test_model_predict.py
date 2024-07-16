@@ -33,11 +33,11 @@ class TestPredictMethod(unittest.TestCase):
         """
         dataset = pd.read_csv(self.data_filepath_csv, header=0)
         self.random_forest.predict(dataset)
-        self.assertEqual(self.random_forest.last_prediction_object_type, pd.DataFrame)
+        self.assertEqual(self.random_forest.prediction_object_type, pd.DataFrame)
 
-        self.assertIsInstance(self.random_forest.last_prediction, np.ndarray)
-        self.assertEqual(self.random_forest.last_prediction.shape[0],
-                         self.random_forest.last_prediction_dataset_size)
+        self.assertIsInstance(self.random_forest.prediction, np.ndarray)
+        self.assertEqual(self.random_forest.prediction.shape[0],
+                         self.random_forest.prediction_dataset_size)
 
     def test_predict_for_csv_file(self):
         """
@@ -45,19 +45,19 @@ class TestPredictMethod(unittest.TestCase):
         """
 
         self.random_forest.predict(self.data_filepath_csv)
-        self.assertEqual(self.random_forest.last_prediction_object_type, str)
-        self.assertEqual(self.random_forest.last_prediction.shape[0],
-                         self.random_forest.last_prediction_dataset_size)
+        self.assertEqual(self.random_forest.prediction_object_type, str)
+        self.assertEqual(self.random_forest.prediction.shape[0],
+                         self.random_forest.prediction_dataset_size)
 
     def test_predict_for_nc_file(self):
         """
         Test the predict method for a random forest model with nc file as input.
         """
         self.random_forest.predict(self.data_filepath_nc)
-        self.assertEqual(self.random_forest.last_prediction_object_type, str)
-        self.assertIsInstance(self.random_forest.last_prediction, np.ndarray)
-        self.assertEqual(self.random_forest.last_prediction.shape[0],
-                         self.random_forest.last_prediction_dataset_size)
+        self.assertEqual(self.random_forest.prediction_object_type, str)
+        self.assertIsInstance(self.random_forest.prediction, np.ndarray)
+        self.assertEqual(self.random_forest.prediction.shape[0],
+                         self.random_forest.prediction_dataset_size)
 
     def test_predict_for_wrong_input(self):
         """
