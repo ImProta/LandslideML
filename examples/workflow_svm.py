@@ -1,6 +1,6 @@
 """
-This script shows the workflow for generating a random forest model using the 
-landslideml library.
+This script shows the workflow for generating a Supporting Vector Machine (SVM) model using 
+the landslideml library.
 
 1. Import the library with `import landslideml as lsm`.
 2. Define the main variables for the model:
@@ -23,7 +23,7 @@ import landslideml as lsm
 
 # Define variables for the model
 DATA_PATH = "./testcase_data/training.csv"
-MODEL_TYPE = "RandomForest"
+MODEL_TYPE = "SVM"
 FEATURE_LIST = ["alti",
                 "slope",
                 "aspect",
@@ -44,29 +44,29 @@ TARGET = 'label'
 TEST_SIZE = 0.25
 
 # Initialize the model with the `generate_model` function
-random_forest = lsm.generate_model(DATA_PATH,
-                                   MODEL_TYPE,
-                                   FEATURE_LIST,
-                                   TARGET,
-                                   TEST_SIZE)
+svm = lsm.generate_model(DATA_PATH,
+                         MODEL_TYPE,
+                         FEATURE_LIST,
+                         TARGET,
+                         TEST_SIZE)
 
 # Modify the model parameters with the `setup` method
-# Note: The parameters are specific to the model type. For this example, we use the Random
-# Forest parameters from scikit-learn library. Visit the scikit-learn documentation for
-# more information on the parameters.
-random_forest.setup(n_estimators=100, max_depth=15, random_state=42)
+# Note: The parameters are specific to the model type. For this example, we use the Supporting
+# Vector Machine (SVM) parameters from scikit-learn library. Visit the scikit-learn documentation 
+# for more information on the parameters.
+svm.setup(degree=3, kernel='rbf', C=1.0, gamma='scale', tol=0.001, probability=False)
 
 # Predict the model with a NetCDF file using the `predict` method
-random_forest.predict("testcase_data/prediction_cropped.nc")
+svm.predict("testcase_data/prediction_cropped.nc")
 
 # Evaluate the model and show the results using the `evaluate_model` method
-random_forest.evaluate_model()
+svm.evaluate_model(show=True)
 
 # Save the model using the `save_model` method
-random_forest.save_model("random_forest_model.pkl")
+svm.save_model("svm_model.pkl")
 
 # Load the model using the `load_model` function
-loaded_model = lsm.load_model("random_forest_model.pkl")
+loaded_model = lsm.load_model("svm_model.pkl")
 
 # Verify the loaded model by printing the prediction map
 print(loaded_model.prediction_map.head())
