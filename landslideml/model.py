@@ -182,8 +182,9 @@ class MlModel:
         if not isinstance(show, bool):
             raise TypeError('Plot must be a boolean.')
         if self.y_pred is None:
-            warnings.warn("No data was loaded. Prediction will be done with test data.")
             self.y_pred = self.model.predict(self.x_test)
+        elif self.y_pred_test is np.ndarray:
+            self.y_pred = self.y_pred
         if show is True:
             print(classification_report(self.y_test, self.y_pred, output_dict=False))
         self.report = classification_report(self.y_test, self.y_pred, output_dict=True)

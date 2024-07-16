@@ -1,17 +1,18 @@
 """
 This script shows the workflow for generating a random forest model using the LandslideML library.
 
-The script shows the 4 mains steps to generate a model:
+The script shows the main steps to generate a random forest model and predict with a NetCDF file:
 1. Imports the library.
-2. Defines the main variables for the model (data path, model type, target variable, and 
- feature list).
+2. Defines the main variables for the model (data path, model type, target variable, feature list, 
+    and test size).
 3. Initializes the model with `generate_model` function.
 4. Modifies the model parameters with the `setup` method.
+5. Predicts the model with a NetCDF file.
 
-Example usage:
-python workflow_random_forest.py
+The script also shows how to save the model, and load the model.
 
-Note: Make sure to provide the correct data path and feature list before running the script.
+Note: Make sure to provide the correct data path, feature list, and test size before running.
+the script.
 """
 
 import landslideml as lsm
@@ -49,10 +50,16 @@ random_forest = lsm.generate_model(DATA_PATH,
 random_forest.setup(n_estimators=100, max_depth=15, random_state=42)
 
 # Predict the model with a csv file
-random_forest.predict("testcase_data/training.csv")
+random_forest.predict("testcase_data/prediction_cropped.nc")
 
 # Evaluate the model
 random_forest.evaluate_model()
 
 # Save the model
 random_forest.save_model("random_forest_model.pkl")
+
+# Load the model
+loaded_model = lsm.load_model("random_forest_model.pkl")
+
+# Verify the loaded model
+print(loaded_model.prediction_map.head())

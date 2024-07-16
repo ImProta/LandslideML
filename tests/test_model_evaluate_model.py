@@ -48,13 +48,6 @@ class TestEvaluateModelMethod(unittest.TestCase):
         with self.assertRaises(TypeError):
             self.random_forest.evaluate_model(show=2)
 
-    def test_evaluate_model_warning_message(self):
-        """
-        Test the evaluate_model method warning when a prediction dataset is not loaded.
-        """
-        with self.assertWarns(Warning):
-            self.random_forest.evaluate_model()
-
 
 if __name__ == '__main__':
     unittest.main(verbosity=3)
