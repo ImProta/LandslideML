@@ -11,8 +11,6 @@ import os
 import warnings
 import joblib
 import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
 
@@ -55,7 +53,7 @@ class MlModel:
         prediction_object(object): The input data for making predictions.
         prediction_object_type(type): The type of the input data for making predictions.
         prediction(array): The predicted values.
-        prediction_map(pd.Dataframe): The mapped prediction values to the original location in dataset.
+        prediction_map(pd.Dataframe): The prediction values linked to the location in dataset.
 
     Methods:
         __init__: Initializes the MlModel class with the specified parameters.
@@ -68,7 +66,6 @@ class MlModel:
         evaluate_model: Evaluates the performance of the trained model.
         predict: Makes predictions using the current trained model.
         save_model: Saves the trained model to a file.
-        generate_heatmap: Saves the heatmap of the dataset to a file.    
 
     Raises:
         ValueError: If the model type is not supported.
@@ -303,32 +300,3 @@ class MlModel:
         if not isinstance(filepath, str):
             raise ValueError('Filepath must be a string.')
         joblib.dump(self, filepath)
-
-    def generate_heatmap(self, filepath):
-        """
-        Save the heatmap of the dataset to a file.
-
-        Input:
-            filepath (str): The filepath to save the heatmap to.
-
-        Raises:
-            TypeError: If the filepath is not a string.
-        """
-        if not isinstance(filepath, str):
-            raise TypeError('Filepath must be a string.')
-        plt.figure(figsize=(10, 8))
-        numeric_data = self.dataset.select_dtypes(include=[float, int])
-        if self.target_column in numeric_data.columns:
-            numeric_data = numeric_data.drop(columns=[self.target_column])
-        keywords = ['coord', 'loc', 'location', 'coordinates']
-        columns_to_exclude = [col for col in numeric_data.columns
-                              if any(keyword in col.lower() for keyword in keywords)]
-        numeric_data = numeric_data.drop(columns=columns_to_exclude)
-        sns.heatmap(numeric_data.corr(),
-                    xticklabels=numeric_data.columns,
-                    yticklabels=numeric_data.columns,
-                    annot=True,
-                    fmt='.2f',
-                    cmap='coolwarm')
-        plt.title('Heatmap of Dataset Features')
-        plt.savefig(filepath)
