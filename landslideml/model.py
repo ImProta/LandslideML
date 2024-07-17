@@ -1,10 +1,10 @@
-"""A module for creating and training machine learning models for landslide prediction.
+"""
+A module for creating and training machine learning models for landslide prediction.
 
-This module provides a class called `model` which allows users to create and train
-machine learning models for landslide prediction. The module supports two types of 
-models: RandomForest and SVM. Users can specify the model type, filepath to the dataset, 
-test size for train-test split, and other optional parameters.
-
+This module provides a class called `MlModel` which allows users to create and train
+machine learning models for landslide prediction. The module supports three types of 
+models: RandomForest, SVM, and Gradient Boosting (GBM). Users can specify the model type,
+filepath to the dataset, test size for train-test split, and other optional parameters.
 """
 
 import os
@@ -26,6 +26,15 @@ class MlModel:
     """
     A class for creating and training machine learning models for landslide prediction.
 
+    Input:
+        filepath (str): The filepath of the dataset to be used for training and testing the model.
+        model_type (str): The type of machine learning model to be used. Supported model types are 
+            'RandomForest', 'SVM', and 'GBM'.
+        target_column (str): The target variable in the dataset.
+        features_list (list): The list of feature variables in the dataset.
+        test_size (float): The proportion of the dataset to be used for testing the model.
+        **kwargs: Additional keyword arguments to be passed to the machine learning model.
+
     Attributes:
         filepath (str): The filepath of the dataset to be used for training and testing the model.
         model_type (str): The type of machine learning model to be used. Supported model types are 
@@ -35,20 +44,31 @@ class MlModel:
         test_size (float): The proportion of the dataset to be used for testing the model.
         kwargs (dict): Additional keyword arguments to be passed to the machine learning model.
         model: The initialized machine learning model.
-        dataset: The loaded dataset.
-        x_train: The training set features.
-        x_test: The testing set features.
-        y_train: The training set target variable.
-        y_test: The testing set target variable.
+        dataset(pd.Dataframe): The loaded dataset from the specified filepath.
+        x_train(pd.Dataframe): The training set features.
+        x_test(pd.Dataframe): The testing set features.
+        y_train(pd.Dataframe): The training set target variable.
+        y_test(pd.Dataframe): The testing set target variable.
+        report(dict): The classification report of the trained model.
+        prediction_dataset_size(int): The size of the prediction dataset.
+        prediction_location(pd.Dataframe): The location columns of the prediction dataset.
+        prediction_object(object): The input data for making predictions.
+        prediction_object_type(type): The type of the input data for making predictions.
+        prediction(array): The predicted values.
+        prediction_map(pd.Dataframe): The mapped prediction values to the original location in dataset.
 
-    Input:
-        filepath (str): The filepath of the dataset to be used for training and testing the model.
-        model_type (str): The type of machine learning model to be used. Supported model types are 
-            'RandomForest', 'SVM', and 'GBM'.
-        target_column (str): The target variable in the dataset.
-        features_list (list): The list of feature variables in the dataset.
-        test_size (float): The proportion of the dataset to be used for testing the model.
-        **kwargs: Additional keyword arguments to be passed to the machine learning model.
+    Methods:
+        __init__: Initializes the MlModel class with the specified parameters.
+        __initialize_model: Initializes the machine learning model of the specified model type.
+        __load_dataset: Loads the data from the specified filepath.
+        __mapping: Maps the prediction values to the original entries in the prediction dataset.
+        __preprocess_data: Preprocesses the data by splitting it into training and testing sets.
+        __verify_input: Verifies the input arguments for the model.
+        setup: Reconfigures the model setup with new parameters.
+        evaluate_model: Evaluates the performance of the trained model.
+        predict: Makes predictions using the current trained model.
+        save_model: Saves the trained model to a file.
+        generate_heatmap: Saves the heatmap of the dataset to a file.    
 
     Raises:
         ValueError: If the model type is not supported.

@@ -52,7 +52,7 @@ svm = lsm.generate_model(DATA_PATH,
 
 # Modify the model parameters with the `setup` method
 # Note: The parameters are specific to the model type. For this example, we use the Supporting
-# Vector Machine (SVM) parameters from scikit-learn library. Visit the scikit-learn documentation 
+# Vector Machine (SVM) parameters from scikit-learn library. Visit the scikit-learn documentation
 # for more information on the parameters.
 svm.setup(degree=3, kernel='rbf', C=1.0, gamma='scale', tol=0.001, probability=False)
 
