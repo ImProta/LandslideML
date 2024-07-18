@@ -40,7 +40,7 @@ class TestLoadModel(unittest.TestCase):
         """
         random_forest_loaded = load_model(self.model_filepath)
         self.assertEqual(self.random_forest.kwargs, random_forest_loaded.kwargs)
-        self.assertEqual(self.random_forest.model_type, random_forest_loaded.model_type)
+        self.assertEqual(self.random_forest.type, random_forest_loaded.type)
         self.assertEqual(self.random_forest.target_column, random_forest_loaded.target_column)
         self.assertEqual(self.random_forest.features_list, random_forest_loaded.features_list)
         self.assertEqual(self.random_forest.test_size, random_forest_loaded.test_size)

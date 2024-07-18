@@ -37,7 +37,7 @@ class TestReaderMethod(unittest.TestCase):
                                        self.test_size)
         self.assertIsInstance(random_forest, MlModel)
         self.assertEqual(random_forest.filepath, self.filepath)
-        self.assertEqual(random_forest.model_type, self.model_type)
+        self.assertEqual(random_forest.type, self.model_type)
         self.assertEqual(random_forest.features_list, self.features)
         self.assertEqual(random_forest.target_column, self.target)
 
@@ -53,7 +53,7 @@ class TestReaderMethod(unittest.TestCase):
                                            self.target,
                                            self.test_size)
             self.assertIsInstance(random_forest, MlModel)
-            self.assertEqual(random_forest.model_type, model_type)
+            self.assertEqual(random_forest.type, model_type)
 
 
     def test_invalid_model_type(self):

@@ -45,7 +45,7 @@ class TestGBMModel(unittest.TestCase):
         """
         Test the attributes of the gbm model.
         """
-        self.assertEqual(self.gbm.model_type, 'GBM')
+        self.assertEqual(self.gbm.type, 'GBM')
         self.assertEqual(self.gbm.features_list, self.features)
         self.assertEqual(self.gbm.target_column, self.target)
         self.assertEqual(self.gbm.test_size, self.test_size)

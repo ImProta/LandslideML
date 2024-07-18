@@ -26,7 +26,7 @@ class MlModel:
 
     Input:
         filepath (str): The filepath of the dataset to be used for training and testing the model.
-        model_type (str): The type of machine learning model to be used. Supported model types are 
+        type (str): The type of machine learning model to be used. Supported model types are 
             'RandomForest', 'SVM', and 'GBM'.
         target_column (str): The target variable in the dataset.
         features_list (list): The list of feature variables in the dataset.
@@ -35,7 +35,7 @@ class MlModel:
 
     Attributes:
         filepath (str): The filepath of the dataset to be used for training and testing the model.
-        model_type (str): The type of machine learning model to be used. Supported model types are 
+        type (str): The type of machine learning model to be used. Supported model types are 
             'RandomForest', 'SVM', and 'GBM'.
         target_column (str): The target variable in the dataset.
         features_list (list): The list of feature variables in the dataset.
@@ -82,7 +82,7 @@ class MlModel:
                   test_size=0.2,
                   **kwargs):
         self.filepath = filepath
-        self.model_type = model_type
+        self.type = model_type
         self.target_column = target_column
         self.features_list = features_list
         self.test_size = test_size
@@ -108,11 +108,11 @@ class MlModel:
         Raises:
             ValueError: If the model type is not supported.
         """
-        if self.model_type == 'RandomForest':
+        if self.type == 'RandomForest':
             return RandomForestClassifier(**self.kwargs)
-        elif self.model_type == 'SVM':
+        elif self.type == 'SVM':
             return SVC(**self.kwargs)
-        elif self.model_type == 'GBM':
+        elif self.type == 'GBM':
             return GradientBoostingClassifier(**self.kwargs)
         else:
             raise ValueError('Model type not supported.')
@@ -149,7 +149,7 @@ class MlModel:
             TypeError: If the target_column is not a string, the features_list
                 is not a list, or the features_list contains non-string elements
         """
-        if self.model_type not in VALID_MODELS:
+        if self.type not in VALID_MODELS:
             raise ValueError('Model type not supported.')
         if not os.path.isfile(self.filepath):
             raise FileNotFoundError(f"File '{self.filepath}' does not exist.")
