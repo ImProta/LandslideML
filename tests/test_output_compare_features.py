@@ -62,12 +62,18 @@ class TestCompareMetricsMethod(unittest.TestCase):
         with self.assertRaises(ValueError):
             lsm.compare_metrics(self.random_forest)
 
-    def test_compare_metrics_different_attributes(self):
+    @patch('matplotlib.pyplot.savefig')
+    @patch('seaborn.barplot')
+    @patch('matplotlib.pyplot.show')
+    def test_compare_metrics_different_attributes(self, mock_show, mock_barplot, mock_savefig):
         """
         Test the compare_metrics method with two models with different features.
         """
         with self.assertWarns(Warning):
             lsm.compare_metrics(self.random_forest, self.svm_2)
+        mock_show.assert_called_once()
+        mock_barplot.assert_called()
+        mock_savefig.assert_not_called()
 
     @patch('matplotlib.pyplot.show')
     def test_compare_metrics_same_attributes(self, mock_show):
@@ -77,14 +83,12 @@ class TestCompareMetricsMethod(unittest.TestCase):
         lsm.compare_metrics(self.random_forest, self.svm)
         mock_show.assert_called_once()
 
-
     def test_compare_metrics_filepath(self):
         """
         Test the compare_metrics method with a filepath argument.
         """
         lsm.compare_metrics(self.random_forest, self.svm, filepath=self.image_path)
         self.assertTrue(os.path.exists(self.image_path))
-
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

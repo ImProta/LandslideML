@@ -118,7 +118,7 @@ def compare_metrics(*models: MlModel, filepath: str = None, palette: str = 'dark
     pivot_df = filtered_df.pivot_table(index=['Model', 'Class', 'Metric'],
                                        values='Value').reset_index()
 
-    fig, axes = plt.subplots(nrows=len(metric_order), ncols=1, figsize=(12, 12), sharey='row')
+    _, axes = plt.subplots(nrows=len(metric_order), ncols=1, sharey='row')
 
     for i, metric in enumerate(metric_order):
         if metric != 'accuracy':
