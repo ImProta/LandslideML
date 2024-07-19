@@ -164,5 +164,5 @@ testcase_data/prediction.nc
 testcase_data/prediction_old.nc
 NOTES.md
 croppingnc.py
-.vscode
+.vscode/*
 !.vscode/settings.json
