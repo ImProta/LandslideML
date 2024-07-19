@@ -5,9 +5,11 @@ models created with the LandslideML package.
 
 import warnings
 import pandas as pd
+import geopandas as gpd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+from matplotlib.colors import ListedColormap
 from landslideml.model import MlModel
 
 
@@ -51,7 +53,146 @@ def __create_metrics_df(models: list[MlModel]) -> pd.DataFrame:
     return gathered_df
 
 
-def generate_heatmap(model: MlModel, filepath: str = None):
+def __get_column_indices(columns, possible_columns):
+    """
+    Get the index of the first column in a list of columns that matches one of the possible columns.
+    If no column matches, return None.
+
+    Input:
+        columns (list): A list of column names.
+        possible_columns (list): A list of possible column names to match.
+
+    Returns:
+        int: The index of the first column that matches one of the possible columns.
+        None: If no column matches any of the possible columns.
+    """
+    lower_columns = [col.lower() for col in columns]
+    for possible_column in possible_columns:
+        if possible_column in lower_columns:
+            return columns[lower_columns.index(possible_column)]
+    return None
+
+
+def __gather_prediction_maps(models):
+    """
+    Gather prediction maps from the models and check for feature consistency.
+
+    Input:
+        models (MlModel): A variable number of models to compare.
+
+    Returns:
+        tuple: A tuple containing the list of prediction maps and a dictionary of model features.
+    """
+    prediction_maps = []
+    model_features_dict = {}
+
+    for model in models:
+        key = f"{model.type}_{model.test_size}"
+        if (
+            key in model_features_dict
+            and model_features_dict[key] != model.features_list
+        ):
+            warnings.warn(
+                f"Models with type '{model.type}' and test size '{model.test_size}' "\
+                    "have different features."
+            )
+        if model.prediction_map is None:
+            raise AttributeError(
+                f"Model {model.type} does not have a prediction_map attribute."
+            )
+        prediction_maps.append(model.prediction_map)
+        model_features_dict[key] = model.features_list
+
+    return prediction_maps, model_features_dict
+
+
+def __find_map_bounds(prediction_maps):
+    """
+    Find the bounding coordinates for the map.
+
+    Input:
+        prediction_maps (list): List of prediction maps.
+
+    Returns:
+        tuple: A tuple containing the min and max latitude and longitude.
+    """
+    possible_long_columns = ["long", "x", "xcoord", "lon", "longitude"]
+    possible_lat_columns = ["lat", "y", "ycoord", "latitude"]
+
+    pred_map_columns = prediction_maps[0].columns
+    idx_long_column = __get_column_indices(pred_map_columns, possible_long_columns)
+    idx_lat_column = __get_column_indices(pred_map_columns, possible_lat_columns)
+
+    if idx_long_column is None or idx_lat_column is None:
+        raise ValueError("Longitude or latitude columns not found in prediction map.")
+
+    xmin, xmax = 180, -180
+    ymin, ymax = 90, -90
+
+    for pred_map in prediction_maps:
+        if pred_map.shape != prediction_maps[0].shape:
+            warnings.warn("The models have different prediction_map structures.")
+        max_long, min_long = (
+            pred_map[idx_long_column].max(),
+            pred_map[idx_long_column].min(),
+        )
+        max_lat, min_lat = (
+            pred_map[idx_lat_column].max(),
+            pred_map[idx_lat_column].min(),
+        )
+        xmax, xmin = max(xmax, max_long), min(xmin, min_long)
+        ymax, ymin = max(ymax, max_lat), min(ymin, min_lat)
+
+    return xmin, xmax, ymin, ymax
+
+
+def __plot_predictions(
+    prediction_maps, models, shp_filepath, filepath, xmin, xmax, ymin, ymax
+):
+    """
+    Plot the predictions on a map.
+
+    Input:
+        prediction_maps (list): List of prediction maps.
+        models (MlModel): List of models.
+        shp_filepath (str): The filepath to the shapefile.
+        filepath (str): The filepath to save the map to.
+        xmin (float): Minimum longitude.
+        xmax (float): Maximum longitude.
+        ymin (float): Minimum latitude.
+        ymax (float): Maximum latitude.
+
+    Returns:
+        None
+    """
+    shapefile = gpd.read_file(shp_filepath)
+    color_map = ListedColormap(['#1f77b4', '#ff7f0e'])
+    all_labels = pd.concat(prediction_maps)['label']
+    unique_labels = sorted(all_labels.dropna().unique())
+    offset = 0.2
+    for i, pred_map in enumerate(prediction_maps):
+        _, ax = plt.subplots()
+        shapefile.plot(ax=ax, color='white', edgecolor='black')
+        ax.set_xlim(xmin - offset, xmax + offset)
+        ax.set_ylim(ymin - offset, ymax + offset)
+        ax.set_title(f'Model {models[i].type}_{models[i].test_size} Predictions')
+        ax.set_xlabel('Longitude')
+        ax.set_ylabel('Latitude')
+        idx_long_column = __get_column_indices(pred_map.columns, ["long", "x", "xcoord", "lon", "longitude"])
+        idx_lat_column = __get_column_indices(pred_map.columns, ["lat", "y", "ycoord", "latitude"])
+        if idx_long_column is None or idx_lat_column is None:
+            raise ValueError("Longitude or latitude columns not found in prediction map.")
+        for label in unique_labels: 
+            label_data = pred_map[pred_map['label'] == label]
+            ax.scatter(label_data[idx_long_column], label_data[idx_lat_column], 
+                       c=[color_map(label)], label=f'Label {label}', alpha=0.5)
+        ax.legend()
+        if filepath is not None:
+            plt.savefig(f"{filepath}_{models[i].type}_{models[i].test_size}.png")
+        else:
+            plt.show()
+
+def plot_heatmap(model: MlModel, filepath: str = None):
     """
     Generate the heatmap of a model for all the features present in the model dataset. The heatmap
     shows the correlation between all the features in the dataset. The heatmap can be saved to a
@@ -90,7 +231,6 @@ def generate_heatmap(model: MlModel, filepath: str = None):
         plt.savefig(filepath)
     elif filepath is None:
         plt.show()
-
 
 def compare_metrics(
     *models: MlModel, filepath: str = None, palette: str = "dark:skyblue"
@@ -161,3 +301,35 @@ def compare_metrics(
         plt.savefig(filepath)
     else:
         plt.show()
+
+def plot_map(*models: "MlModel", filepath: str = None, shp_filepath: str = None):
+    """
+    Plot the map of the dataset for each model in an overlay. The map shows the predicted label
+    in a different color for each model. The map can be saved to a file if a filepath is provided.
+    Otherwise, the map is displayed.
+
+    Input:
+        models (MlModel): A variable number of models to compare.
+        filepath (str): The filepath to save the map to.
+        shp_filepath (str): The filepath to the shapefile.
+
+    Raises:
+        TypeError: If the filepath is not a string.
+        TypeError: If the models have different features.
+
+    Returns:
+        None
+    """
+    if not isinstance(filepath, str) and filepath is not None:
+        raise TypeError("Filepath must be a string.")
+    if shp_filepath is None:
+        raise ValueError("Shapefile filepath must be provided.")
+    if not isinstance(shp_filepath, str):
+        raise TypeError("Shapefile filepath must be a string.")
+
+    prediction_maps, _ = __gather_prediction_maps(models)
+    xmin, xmax, ymin, ymax = __find_map_bounds(prediction_maps)
+
+    __plot_predictions(
+        prediction_maps, models, shp_filepath, filepath, xmin, xmax, ymin, ymax
+    )

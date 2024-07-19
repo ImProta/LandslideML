@@ -10,13 +10,13 @@ import landslideml as lsm
 
 class TestGenerateHeatmap(unittest.TestCase):
     """
-    Test the generate_heatmap method in the LandslideML package for a Random Forest model.
+    Test the plot_heatmap method in the LandslideML package for a Random Forest model.
     Test cases:
-    - test_generate_heatmap_with_filepath: Test the generate_heatmap method with a filepath.
-    - test_generate_heatmap_without_filepath: Test the generate_heatmap method without a filepath.
-    - test_generate_heatmap_with_invalid_filepath: Test the generate_heatmap method with
+    - test_plot_heatmap_with_filepath: Test the plot_heatmap method with a filepath.
+    - test_plot_heatmap_without_filepath: Test the plot_heatmap method without a filepath.
+    - test_plot_heatmap_with_invalid_filepath: Test the plot_heatmap method with
         an invalid filepath.
-    - test_generate_heatmap_with_invalid_model_input: Test the generate_heatmap method with
+    - test_plot_heatmap_with_invalid_model_input: Test the plot_heatmap method with
         an invalid model input.
     """
 
@@ -45,44 +45,44 @@ class TestGenerateHeatmap(unittest.TestCase):
         if os.path.exists(self.heatmap_filepath):
             os.remove(self.heatmap_filepath)
 
-    def test_generate_heatmap_with_filepath(self):
+    def test_plot_heatmap_with_filepath(self):
         """
-        Test the generate_heatmap method for a random forest model when given a filepath.
+        Test the plot_heatmap method for a random forest model when given a filepath.
         It verifies if the heatmap file is generated.
         """
-        lsm.generate_heatmap(self.random_forest, self.heatmap_filepath)
+        lsm.plot_heatmap(self.random_forest, self.heatmap_filepath)
         self.assertTrue(os.path.exists(self.heatmap_filepath))
 
     @patch("matplotlib.pyplot.savefig")
     @patch("seaborn.heatmap")
     @patch("matplotlib.pyplot.show")
-    def test_generate_heatmap_without_filepath(
+    def test_plot_heatmap_without_filepath(
         self, mock_show, mock_heatmap, mock_savefig
     ):
         """
-        Test the generate_heatmap method for a random forest model without giving a filepath.
+        Test the plot_heatmap method for a random forest model without giving a filepath.
         It verifies if the heatmap is shown but not saved.
         """
-        lsm.generate_heatmap(self.random_forest)
+        lsm.plot_heatmap(self.random_forest)
         mock_heatmap.assert_called_once()
         mock_show.assert_called_once()
         mock_savefig.assert_not_called()
 
-    def test_generate_heatmap_with_invalid_filepath(self):
+    def test_plot_heatmap_with_invalid_filepath(self):
         """
-        Test the generate_heatmap method with an invalid filepath input.
+        Test the plot_heatmap method with an invalid filepath input.
         It verifies that the method raises a TypeError when the input is not a string.
         """
         with self.assertRaises(TypeError):
-            lsm.generate_heatmap(self.random_forest, 123)
+            lsm.plot_heatmap(self.random_forest, 123)
 
-    def test_generate_heatmap_with_invalid_model_input(self):
+    def test_plot_heatmap_with_invalid_model_input(self):
         """
-        Test the generate_heatmap method with an invalid model input.
+        Test the plot_heatmap method with an invalid model input.
         It verifies that the method raises a TypeError when the input is not a MlModel object.
         """
         with self.assertRaises(TypeError):
-            lsm.generate_heatmap(123)
+            lsm.plot_heatmap(123)
 
 
 if __name__ == "__main__":
