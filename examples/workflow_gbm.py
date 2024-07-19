@@ -42,6 +42,7 @@ FEATURE_LIST = ["alti",
                 "n_mrc"]
 TARGET = 'label'
 TEST_SIZE = 0.25
+FILEPATH_PREDICTION = "testcase_data/prediction_cropped.nc"
 
 # Initialize the model with the `generate_model` function
 gbm = lsm.generate_model(DATA_PATH,
@@ -57,7 +58,7 @@ gbm = lsm.generate_model(DATA_PATH,
 gbm.setup(n_estimators=100, max_depth=4, warm_start=True)
 
 # Predict the model with a NetCDF file using the `predict` method
-gbm.predict("testcase_data/prediction_cropped.nc")
+gbm.predict(FILEPATH_PREDICTION)
 
 # Evaluate the model and show the results using the `evaluate_model` method
 gbm.evaluate_model(show=True)

@@ -237,7 +237,6 @@ class MlModel:
         )
         coordinate_columns = ["coord", "coordinates", "position", "pos"]
         type_of_data = type(data)
-        # Read the data and extract the features for a pandas dataframe as input
         if type_of_data == pd.DataFrame:
             data_to_predict = data[self.features_list]
             self.prediction_dataset_size = data_to_predict.shape[0]
@@ -249,7 +248,6 @@ class MlModel:
                 ]
             ]
             self.prediction_location = location_columns
-        # Extract the features for an xarray dataset as input
         elif type_of_data == xr.Dataset:
             data_to_predict = data.to_dataframe()[self.features_list]
             self.prediction_dataset_size = data_to_predict.shape[0]
@@ -261,11 +259,9 @@ class MlModel:
                 ]
             ]
             self.prediction_location = location_columns
-        # Read the data from a file and extract the features
         elif type_of_data == str:
             if not os.path.isfile(data):
                 raise FileNotFoundError(f"File '{data}' does not exist.")
-            # Read the data from a CSV file
             elif data.endswith(".csv"):
                 csv_df = pd.read_csv(data, header=0)
                 data_to_predict = csv_df[self.features_list]
@@ -278,7 +274,6 @@ class MlModel:
                     ]
                 ]
                 self.prediction_location = location_columns
-            # Read the data from a NetCDF file
             elif data.endswith(".nc"):
                 ds = xr.open_dataset(data)
                 features_bytes = ds.features.values
