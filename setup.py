@@ -30,11 +30,14 @@ setup(
         "Operating System :: OS Independent",
     ],
     install_requires=[
-        'numpy',
-        'pandas',
-        'scikit-learn',
-        'matplotlib',
-        # add other dependencies if needed
+        'joblib==1.4.2',
+        'matplotlib==3.9.1',
+        'numpy==2.0.0',
+        'pandas==2.2.2',
+        'scikit_learn==1.5.1',
+        'seaborn==0.13.2',
+        'setuptools==70.2.0',
+        'xarray==2024.6.0',
     ],
     extras_require={
         'dev': ['pytest','black'],
