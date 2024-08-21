@@ -22,6 +22,7 @@ def generate_model(
                         Select from 'RandomForest', 'SVM', 'GBM'.
         features (list): The list of feature names.
         target (str): The target variable name.
+        test_size (float): The proportion of the dataset to include in the test split.
 
     Returns:
         MlModel: An instance of the MlModel class representing the trained machine learning model.

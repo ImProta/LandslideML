@@ -46,10 +46,10 @@ FILEPATH_PREDICTION = "testcase_data/prediction_cropped.nc"
 
 # Initialize the model with the `generate_model` function
 gbm = lsm.generate_model(DATA_PATH,
-                                   MODEL_TYPE,
-                                   FEATURE_LIST,
-                                   TARGET,
-                                   TEST_SIZE)
+                         MODEL_TYPE,
+                         FEATURE_LIST,
+                         TARGET,
+                         TEST_SIZE)
 
 # Modify the model parameters with the `setup` method
 # Note: The parameters are specific to the model type. For this example, we use the Random
