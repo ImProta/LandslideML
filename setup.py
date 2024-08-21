@@ -12,7 +12,7 @@ with codecs.open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = '\n' + f.read()
 
 VERSION = '0.0.1'
-DESCRIPTION = 'A package for generation of binary landslide susceptibility ML models'
+DESCRIPTION = 'A package for generation of landslide susceptibility mapping with ML models'
 
 setup(
     name='landslideml',
@@ -21,7 +21,7 @@ setup(
     packages=find_packages(),
     long_description=long_description,
     url='https://github.com/ImProta/LandslideML',
-    author='ImProta',
+    author='Victor Improta',
     author_email="victor.improta.moreira@rwth-aachen.de",
     license='GNU',
     classifiers = [
