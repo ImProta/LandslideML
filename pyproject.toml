@@ -30,8 +30,6 @@ classifiers = [
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3.12",
   'Topic :: Scientific/Engineering',
-  'Topic :: Landslide',
-  'Topic :: Machine Learning'
 ]
 
 [project.urls]
