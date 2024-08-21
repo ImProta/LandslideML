@@ -36,6 +36,7 @@ pip install landslideml
 
 ### Folder structure
 
+```bash
 landslideml
 ├─── README.md
 ├─── LICENSE
@@ -73,6 +74,7 @@ landslideml
 │   ├─── test_reader_generate_model.py
 │   ├─── test_reader_load_model.py
 │   └─── test_svm_workflow.py
+```
 
 ### Examples
 
