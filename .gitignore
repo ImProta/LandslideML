@@ -167,3 +167,5 @@ NOTES.md
 croppingnc.py
 .vscode/*
 !.vscode/settings.json
+
+tree_landslide.txt

@@ -4,10 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "landslideml"
-version = "0.0.1"
+version = "1.0.1"
 description = "A package for generation of landslide susceptibility mapping with ML models"
 authors = [
-  { name="Example Author", email="author@example.com" },
+  { name="Victor Improta", email="victor.improta.moreira@rwth-aachen.de" },
 ]
 requires-python = ">=3.12"
 dependencies = [
@@ -24,12 +24,12 @@ dependencies = [
 license = { file = "LICENSE.txt" }
 readme = "README.md"
 classifiers = [
-  "Development Status :: 3 - Alpha",
   "Intended Audience :: Developers",
   "Intended Audience :: Science/Research",
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3.12",
-  'Topic :: Scientific/Engineering',
+  "Operating System :: OS Independent",
+  "Topic :: Scientific/Engineering",
 ]
 
 [project.urls]
